@@ -3,8 +3,6 @@ name: Checks
 
 on: [push]
 
-env:
-    ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true
 jobs:
     test-lint:
         name: Test and Lint
@@ -17,7 +15,7 @@ jobs:
                     password: ${{ secrets.DOCKERHUB_TOKEN}}
 
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v3
               with:
                 path: main
 
