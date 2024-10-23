@@ -6,8 +6,10 @@ from django.contrib.auth import get_user_model
 
 from core import models
 
+
 def create_user(email='emailtest@example.com', password='password123'):
     return get_user_model().objects.create_user(email, password)
+
 
 class ModelTests(TestCase):
     def test_create_user_with_email_successfully(self):
@@ -36,10 +38,8 @@ class ModelTests(TestCase):
             self.assertEqual(user.email, expected)
 
     def test_new_user_without_email_raises_error(self):
-        
         with self.assertRaises(ValueError):
-            get_user_model().objects.create_user(email='',password='test123')
-
+            get_user_model().objects.create_user(email='', password='test123')
 
     def test_create_superuser(self):
         email = 'test@example.com'
@@ -55,14 +55,14 @@ class ModelTests(TestCase):
     def test_create_recipe(self):
         """ test creating a recipe"""
         user = get_user_model().objects.create_user(
-            'email@example.com','goodpass'
+            'email@example.com', 'goodpass'
         )
         recipe = models.Recipe.objects.create(
-            user = user,
-            title = 'recipe title',
-            time_minutes = 60,
-            price = Decimal('20.06'),
-            description = 'recipe description'
+            user=user,
+            title='recipe title',
+            time_minutes=60,
+            price=Decimal('20.06'),
+            description='recipe description'
         )
         self.assertEqual(str(recipe), recipe.title)
 
@@ -70,8 +70,8 @@ class ModelTests(TestCase):
         """test creating a tag"""
         user = create_user()
         tag = models.Tag.objects.create(
-            user = user,
-            name = 'tag name'
+            user=user,
+            name='tag name'
         )
         self.assertEqual(str(tag), tag.name)
 
@@ -79,9 +79,9 @@ class ModelTests(TestCase):
         """Test  creating an ingredient"""
         user = create_user()
         ingredient = models.Ingredient.objects.create(
-            user = user,
-            name = 'Ingedient Name',
-            quantity = '100g'
+            user=user,
+            name='Ingedient Name',
+            quantity='100g'
         )
         self.assertEqual(str(ingredient), ingredient.name)
 
@@ -92,4 +92,4 @@ class ModelTests(TestCase):
         mock_uuid.return_value = uuid
         file_path = models.recipe_image_file_path(None, 'example.jpg')
 
-        self.assertEqual(file_path, f'uploads/recipe/{uuid}.jpg')   
+        self.assertEqual(file_path, f'uploads/recipe/{uuid}.jpg')

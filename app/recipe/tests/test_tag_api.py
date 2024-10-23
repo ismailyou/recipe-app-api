@@ -13,6 +13,7 @@ from recipe.serializers import TagSerializer
 
 TAGS_URL = reverse('recipe:tag-list')
 
+
 def create_user(email='user@example.com', password='goodpass'):
     return get_user_model().objects.create_user(email=email, password=password)
 
@@ -21,15 +22,17 @@ def detail_url(tag_id):
     """create and return tag details url"""
     return reverse('recipe:tag-detail', args=[tag_id])
 
+
 class PublicTagAPITest(TestCase):
     """Test the publicly available tags API"""
     def setUP(self):
         self.client = APIClient()
-    
+
     def test_auth_required(self):
         """Test auth is required to access the tags API"""
         res = self.client.get(TAGS_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivateTagAPITest(TestCase):
     """Test the authorized tags API"""
@@ -37,12 +40,12 @@ class PrivateTagAPITest(TestCase):
         self.user = create_user()
         self.client = APIClient()
         self.client.force_authenticate(self.user)
-    
+
     def test_retrieve_tags(self):
         """Test retrieving a list of tags"""
         Tag.objects.create(user=self.user, name='Vegan')
         Tag.objects.create(user=self.user, name='Dessert')
-        
+
         res = self.client.get(TAGS_URL)
         tags = Tag.objects.all().order_by('-name')
 
@@ -62,7 +65,7 @@ class PrivateTagAPITest(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], tag.name)
         self.assertEqual(res.data[0]['id'], tag.id)
-    
+
     def test_update_tag(self):
         """ test updating a tag """
         tag = Tag.objects.create(user=self.user, name='Test Tag')
@@ -82,7 +85,7 @@ class PrivateTagAPITest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Tag.objects.filter(id=tag.id).exists())
-        
+
     def test_filtred_tags_assigned_to_recipe(self):
         """Test listing tags are assigned to recipe"""
         tag1 = Tag.objects.create(user=self.user, name='Test Tag')
@@ -96,7 +99,7 @@ class PrivateTagAPITest(TestCase):
             description='Test Description'
         )
         recipe.tags.add(tag1)
-        res =self.client.get(TAGS_URL, {
+        res = self.client.get(TAGS_URL, {
             'assigned_only': 1
         })
         s1 = TagSerializer(tag1)

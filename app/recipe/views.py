@@ -1,4 +1,3 @@
-
 from drf_spectacular.utils import (
     extend_schema_view,
     extend_schema,
@@ -6,8 +5,8 @@ from drf_spectacular.utils import (
     OpenApiTypes,
 )
 from rest_framework import (
-    viewsets, 
-    mixins, 
+    viewsets,
+    mixins,
     status
 )
 from rest_framework.decorators import action
@@ -18,9 +17,11 @@ from rest_framework.permissions import IsAuthenticated
 
 from core.models import Recipe, Tag, Ingredient
 from recipe import serializers
+
+
 @extend_schema_view(
     list=extend_schema(
-        parameters = [
+        parameters=[
             OpenApiParameter(
                 'tags',
                 OpenApiTypes.STR,
@@ -30,7 +31,7 @@ from recipe import serializers
             OpenApiParameter(
                 'ingredients',
                 OpenApiTypes.STR,
-                description= 'Comma separated list of ingredients IDs to filter'
+                description='Comma separated list of ingredients IDs to filter'
             )
         ]
     )
@@ -45,7 +46,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def _params_into_int(self, qs):
         """Convert a string of ids to integer"""
         return [int(str_id) for str_id in qs.split(',')]
-    
+
     def get_queryset(self):
         """Returns a queryset of recipe objects for authenticated user"""
         tags = self.request.query_params.get('tags')
@@ -53,24 +54,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         if tags:
             tags_ids = self._params_into_int(tags)
-            queryset = queryset.filter(tags__id__in = tags_ids)
+            queryset = queryset.filter(tags__id__in=tags_ids)
 
         if ingredients:
             ingredients_ids = self._params_into_int(ingredients)
-            queryset = queryset.filter(ingredients__id__in = ingredients_ids)
+            queryset = queryset.filter(ingredients__id__in=ingredients_ids)
 
         return queryset.filter(
             user=self.request.user
             ).order_by('-id').distinct()
-    
+
     def get_serializer_class(self):
         if self.action == 'list':
             return serializers.RecipeSerializer
         elif self.action == 'upload_image':
             return serializers.RecipeImageSerializer
-        
+
         return self.serializer_class
-    
+
     def perform_create(self, serializer):
         """create a new recipe"""
         serializer.save(user=self.request.user)
@@ -84,24 +85,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @extend_schema_view(
     list=extend_schema(
-        parameters = [
+        parameters=[
             OpenApiParameter(
                 'assigned_only',
-                OpenApiTypes.INT, enum=[0,1],
+                OpenApiTypes.INT, enum=[0, 1],
                 description='Filter to only include assigned recipes'
             )
         ]
     )
 )
 class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.ListModelMixin, 
-                 viewsets.GenericViewSet):
+                            mixins.UpdateModelMixin,
+                            mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
     """Base class for recipe attributes"""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -119,6 +121,7 @@ class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
             user=self.request.user
         ).order_by('-name').distinct()
 
+
 class TagViewSet(BaseRecipeAttrViewSet):
     """View set for Tag view"""
     serializer_class = serializers.TagSerializer
@@ -129,6 +132,3 @@ class IngredientViewSet(BaseRecipeAttrViewSet):
     """View set for Ingredient view"""
     serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
-
-    
-    

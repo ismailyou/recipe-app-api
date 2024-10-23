@@ -13,11 +13,14 @@ from recipe.serializers import IngredientSerializer
 
 INGREDIENTS_URL = reverse('recipe:ingredient-list')
 
+
 def detail_url(recipe_id):
     return reverse('recipe:ingredient-detail', args=[recipe_id])
 
+
 def create_user(email='user@example.com', password='goodpassword'):
     return get_user_model().objects.create_user(email, password)
+
 
 def create_ingredient(user, **params):
 
@@ -28,16 +31,17 @@ def create_ingredient(user, **params):
     defaults.update(params)
     return Ingredient.objects.create(user=user, **defaults)
 
+
 class PublicIngredientAPITest(TestCase):
     """Test public available ingredient api"""
     def setUp(self):
         self.client = APIClient()
 
-    
     def test_retrieve_ingredient(self):
         """Test retrieving a list of ingredients"""
         res = self.client.get(INGREDIENTS_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivateIngredientAPITest(TestCase):
     """Test priviate available ingredient api"""
@@ -78,7 +82,7 @@ class PrivateIngredientAPITest(TestCase):
         ingredient = create_ingredient(user=self.user)
         url = detail_url(ingredient.id)
 
-        payload = {'name': 'Updated Ingredient', 'quantity': 15}    
+        payload = {'name': 'Updated Ingredient', 'quantity': 15}
 
         res = self.client.patch(url, payload)
 
@@ -98,17 +102,16 @@ class PrivateIngredientAPITest(TestCase):
         ingredients = Ingredient.objects.filter(user=self.user)
         self.assertFalse(ingredients.exists())
 
-
     def test_filter_ingredients_assigned_to_recipe(self):
         """" Test filter ingredients assigned to recipe"""
         ing1 = Ingredient.objects.create(user=self.user, name="Apple")
         ing2 = Ingredient.objects.create(user=self.user, name="Turky")
         recipe = Recipe.objects.create(
-            title = 'Recipe for test',
-            price = Decimal('20.03'),
-            time_minutes = 30,
-            description = 'Test recipe',
-            user = self.user
+            title='Recipe for test',
+            price=Decimal('20.03'),
+            time_minutes=30,
+            description='Test recipe',
+            user=self.user
         )
 
         recipe.ingredients.add(ing1)
@@ -118,7 +121,7 @@ class PrivateIngredientAPITest(TestCase):
         })
         s1 = IngredientSerializer(ing1)
         s2 = IngredientSerializer(ing2)
-        
+
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(s1.data, res.data)
         self.assertNotIn(s2.data, res.data)
@@ -129,18 +132,18 @@ class PrivateIngredientAPITest(TestCase):
         Ingredient.objects.create(user=self.user, name="Lentils")
 
         recipe1 = Recipe.objects.create(
-            title = 'Recipe for test',
-            price = Decimal('20.03'),
-            time_minutes = 30,
-            description = 'Test recipe',
-            user = self.user
+            title='Recipe for test',
+            price=Decimal('20.03'),
+            time_minutes=30,
+            description='Test recipe',
+            user=self.user
         )
         recipe2 = Recipe.objects.create(
-            title = 'Recipe',
-            price = Decimal('23.03'),
-            time_minutes = 30,
-            description = 'Test recipe',
-            user = self.user
+            title='Recipe',
+            price=Decimal('23.03'),
+            time_minutes=30,
+            description='Test recipe',
+            user=self.user
         )
 
         recipe1.ingredients.add(ing1)

@@ -6,6 +6,7 @@ from django.contrib.auth import (
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
@@ -14,11 +15,11 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True, 'min_length': 5},
             'name': {'required': True},
         }
-    
+
     def create(self, validated_data):
         """create and return a new user with crypted password"""
         return get_user_model().objects.create_user(**validated_data)
-    
+
     def update(self, instance, validated_data):
         """update and return a new user with crypted password"""
         password = validated_data.pop('password', None)
@@ -27,7 +28,6 @@ class UserSerializer(serializers.ModelSerializer):
         if password:
             user.set_password(password)
             user.save()
-        
         return user
 
 
@@ -54,8 +54,6 @@ class AuthTokenSerializer(serializers.Serializer):
                 _('Unable to authenticate with provided credentials.'),
                 code='authorization'
             )
-        
         attrs['user'] = user
 
         return attrs
-    
